@@ -1,0 +1,15 @@
+% HW 2 -- Problem 4.17
+
+% Initial Construction of Problem
+
+NewtonianFrame N                    % Introduces nx> ny> nz> No
+RigidBody B , C
+Constant thetaB , thetaC
+
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+rotB = B.SetRotationMatrix( N , nz> , thetaB)
+rotC = C.SetRotationMatrix(N , nz> , thetaC)
+rotBCv = rotB * getTranspose(rotC)
+
+save HW02_4.17.html

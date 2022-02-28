@@ -1,0 +1,48 @@
+% run StudentMicrophoneEX
+% Inspection of the Problem
+
+%    File: MGCableLengthToKeepBeamHorizontal.txt
+% Problem: Determine length of cable C to keep beam horizontal.
+%    Note: MotionGenesis script with student blanks at
+%          www.MotionGenesis.com -> TextbookResources
+%------------------------------------------------------------------------------
+NewtonianFrame N        % Building with Nx> horizontally right, Ny> vertically upward.
+RigidBody      B        % Beam with endpoints Bo and Bc.
+Point          Nc( N )  % Point of N attached to cable C.
+Point          Bc( B )  % Point of B attached to cable C.
+%------------------------------------------------------------------------------
+Constant  LN = 15 m     % Distance between No and NC.
+Constant  LB =  7 m     % Distance between Bo and BC (length of beam).
+Constant  LA =  7 m     % Length of cable A (connects Bo to No).
+Variable  LC            % Length of cable C (connects BC to NC).
+Variable  qA            % Angle for cable A, from Ny> to BoNo> with positive sense +Nz>.
+%------------------------------------------------------------------------------
+%   Position vectors.
+NC.SetPosition( No,  LN*Nx> )
+Bo.SetPosition( No,  LA*sin(qA)*Nx> - LA*cos(qA)*Ny> )
+BC.SetPosition( Bo,  LB*Nx> )
+Bcm.SetPosition( Bo,  0.25*LB*Nx> )
+%------------------------------------------------------------------------------
+%   Geometry relates length of cable C to magnitude of position vector from Bc to Nc.
+p> = Nc.GetPosition( Bc )
+LengthConstraint = LC^2 - Dot( p>, p> )           % LengthConstraint = 0.
+%------------------------------------------------------------------------------
+%   Statics is necessary to solve this problem.
+Variable  TA, TC         % Tensions in cables A and C.
+B.SetMass( m = 100 kg )  % Mass does not affect answer for LC, but affects tensions.
+Constant  g = 9.8 m/s^2  % Gravity does not affect answer for LC, but affects tensions.
+%------------------------------------------------------------------------------
+%   Forces on beam.
+unitVectorFromBoToNo> = No.GetPositionVector(Bo) / LA
+unitVectorFromBcToNc> = NC.GetPositionVector(Bc) / LC
+Bo.AddForce( TA * unitVectorFromBoToNo> )
+BC.AddForce( TC * unitVectorFromBcToNc> )
+Bcm.AddForce( -m*g*Ny> )
+%------------------------------------------------------------------------------
+%   Static equilibrium for beam B.
+Statics[1] = Dot( Nx>,  B.GetResultantForce()    )  % Net force on B in Nx> direction is zero.
+Statics[2] = Dot( Ny>,  B.GetResultantForce()    )  % Net force on B in Ny> direction is zero.
+Statics[3] = Dot( Nz>,  B.GetResultantMoment(Bo) )  % Moment on B about Bo in Nz> direction is zero.
+%------------------------------------------------------------------------------
+%   Solve set of nonlinear algebraic equations (with guess).
+Solve( [LengthConstraint; Statics] = 0,   qA = 30 degrees,  TA = m*g/2, TC = m*g/2, LC = LA )

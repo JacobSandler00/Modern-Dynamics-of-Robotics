@@ -1,0 +1,106 @@
+% Modeling % Identifiers ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NewtonianFrame N
+RigidBody A , B , C , D , E , F
+Point Df ( D ) , Ff ( F )
+Particle Q
+
+Constants H , LA , LB , LHF , LFF
+Constants KA , KM , DampA , DampM , g
+Constants Izza , Izzb , Izzhf , Izzff
+Constants ma , mb , mhf , mff , mq
+Constants qnank , qnmet
+Constants khc , bhc , n
+Constants uk , vo
+Constants vTread
+
+Variable x1'' , x2'',x3'' , x4''
+Variables qa'' , qb'' , qc'' , qd'' , qe'' , qf''
+Variables Tank1 , Tank2 , Tmet1 , Tmet2
+
+% Physics ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+A.RotateZ(N , qa)
+B.RotateZ(A ,-qb)
+C.RotateZ(B , qc)
+D.RotateZ(C , qd)
+E.RotateZ(B , qe)
+F.RotateZ(E , qf)
+
+ Ao.Translate ( No , ( H   )*ny>)
+Acm.Translate ( Ao , (LA/2 )*ax>)
+  Q.Translate (Acm , (LA/2 )*ax>)
+Bcm.Translate (Acm ,      0>    )
+ Co.Translate (Bcm , (LB/2 )*bx>)
+Ccm.Translate ( Co , (LHf/2)*cx>)
+ Do.Translate (Ccm , (LHf/2)*cx>)
+Dcm.Translate ( Do , (Lff/2)*dx>)
+ Df.Translate (Dcm , (Lff/2)*dx>)
+ Eo.Translate (Bcm ,-(LB/2 )*bx>)
+Ecm.Translate ( Eo ,-(Lhf/2)*ey>)
+ Fo.Translate (Ecm ,-(Lhf/2)*ey>)
+Fcm.Translate ( Fo , (Lff/2)*fx>)
+ Ff.Translate (Fcm , (Lff/2)*fx>)
+
+yC = dot(Ccm.GetPosition(No) , ny>)
+yD = dot(Dcm.GetPosition(No) , ny>)
+
+q.SetMass( mq )
+A.SetMassInertia(  ma , 0 , 0 , Izza )
+B.SetMassInertia(  mb , 0 , 0 , Izzb )
+C.SetMassInertia( mhf , 0 , 0 , Izzhf)
+D.SetMassInertia( mff , 0 , 0 , Izzff)
+E.SetMassInertia( mhf , 0 , 0 , Izzhf)
+F.SetMassInertia( mff , 0 , 0 , Izzff)
+
+System.AddForceGravity ( -g*ny>)
+
+% Simplify & Solve ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+vt1 = GetMagnitude(Ccm.GetVelocity(N)) % change in MATLAB
+vt2 = GetMagnitude(Dcm.GetVelocity(N)) % change in MATLAB
+vt3 = GetMagnitude(Ecm.GetVelocity(N)) % change in MATLAB
+vt4 = GetMagnitude(Fcm.GetVelocity(N)) % change in MATLAB
+
+yc = dot(Ccm.GetPosition(No) , nx>)
+yd = dot(Dcm.GetPosition(No) , nx>)
+ye = dot(Ecm.GetPosition(No) , nx>)
+yf = dot(Fcm.GetPosition(No) , nx>)
+
+setDt(x1 = -yC) % Change in MATLAB
+setDt(x2 = -yD) % Change in MATLAB
+setDt(x3 = -yE) % Change in MATLAB
+setDt(x4 = -yF) % Change in MATLAB
+
+FHC1 = khc*x1^n + bhc*x1'*x1^n
+FHC2 = khc*x2^n + bhc*x2'*x2^n
+FHC3 = khc*x3^n + bhc*x3'*x3^n
+FHC4 = khc*x4^n + bhc*x4'*x4^n
+
+FC1 = uk*FHC1
+FC2 = uk*FHC2
+FC3 = uk*FHC3
+FC4 = uk*FHC4
+
+Ff1 = FC1*( 1-exp(-3*vt1/vo))*sign(vo)
+Ff2 = FC2*( 1-exp(-3*vt2/vo))*sign(vo)
+Ff3 = FC3*( 1-exp(-3*vt3/vo))*sign(vo)
+Ff4 = FC4*( 1-exp(-3*vt4/vo))*sign(vo)
+
+
+
+C.AddTorque (B , Tank1 * nz>)
+D.AddTorque (C , Tmet1 * nz>)
+E.AddTorque (B , Tank2 * nz>)
+F.AddTorque (E , Tmet2 * nz>)
+
+Ccm.AddForce(Ff1*nx> + FHC1*ny>)
+Dcm.AddForce(Ff2*nx> + FHC2*ny>)
+Ecm.AddForce(Ff3*nx> + FHC3*ny>)
+Fcm.AddForce(Ff4*nx> + FHC4 *ny>)
+
+% Specify Angles
+% qa - harmonic-esque motion , what are max and min Angles
+% qb - constant angular velocity
+% qc , qd , qe , qf - harmonic dampening
+
+
+setDt( qb' = 30 )

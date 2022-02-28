@@ -1,0 +1,30 @@
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NewtonianFrame N
+RigidBody A , B
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Constant LA , LB , ma , mb , g , IzzA , IzzB
+Variable qa'' , qb''
+Specified TA , TB
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+A.RotateZ(N , qa)
+B.RotateZ(A , qb)
+Acm.Translate(No , LA/2*ax>)
+Bcm.Translate(Acm, LA/2*ax> + LB/2*bx>)
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+A.SetMassInertia(mA , 0, 0 , IzzA)
+B.SetMassInertia(mB , 0, 0 , IzzB)
+System.AddForceGravity(-g*nz>)
+A.AddTorque(N , TA*nz>)
+B.AddTorque(A , TB*nz>)
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+System.SetGeneralizedSpeed(qa' , qb')
+KANE = System.GetDynamicsKane()
+SOLN = Solve(KANE , qa'' , qb'')
+
+
+KaneQaLeft = dot(A.GetResultantForce() , LA/2*ay>) + dot(A.GetResultantTorque() , az>) + dot(B.GetResultantForce() , LA*ay>+LB/2*by>) + dot(B.GetResultantTorque() , bz>)
+KaneQaRight= dot(A.GetEffectiveForce() , LA/2*ay>) + dot(A.GetMomentofEffectiveForce(Acm) , az>) + dot(B.GetEffectiveForce() , LA*ay>+LB/2*by>) + dot(B.GetMomentofEffectiveForce(Bcm) , bz>)
+%
+%
+% KaneQbLeft = dot(B.GetResultantForce() , LB/2*by>) + dot(B.GetResultantTorque() , bz>)
+% KaneQbRight = dot(B.GetEffectiveForce() , LB/2*by>) + dot(B.GetMomentofEffectiveForce(Bcm) , bz>)

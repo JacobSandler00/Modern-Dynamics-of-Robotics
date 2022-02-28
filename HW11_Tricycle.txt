@@ -1,0 +1,151 @@
+% MotionGenesis file:  MGVehicleTricycleKaneEmbeddedWithFeedForwardControl.txt
+% Copyright (c) 2009 Motion Genesis LLC.  All rights reserved.
+% Problem: Statics/dynamics and feed-forward control of three-wheel vehicle (tricycle).
+%--------------------------------------------------------------------
+%       Physical objects
+NewtonianFrame  N
+RigidBody       A
+RigidBody       B, C
+RigidFrame      E
+RigidBody       F
+Point           BN( B )
+Point           CN( C )
+Point           FN( F )
+Point           Scm( A )
+%--------------------------------------------------------------------
+%       Constants and variables
+Constant  b = 0.75 m
+Constant  R = 0.35 m
+Constant  e = 2.0  m
+Constant  a = 1.64 m
+Constant  h = 0.35 m
+Constant  g = 9.8  m/s^2
+Constant  theta = 15 deg
+Variable  TB
+Variable  TSteer
+Variable  v'
+Variable  qA''
+Variable  wB'
+Variable  wC'
+Variable  qE''
+Variable  wF'
+SetGeneralizedSpeed( v, qE' )
+%--------------------------------------------------------------------
+%       Mass and inertia
+A.SetMass( mA = 640 kg)
+B.SetMass(  m =  30 kg )
+C.SetMass(  m )
+F.SetMass(  m )
+A.SetInertia( Acm, IAxx, IAyy, IAzz = 166.6 kg*m^2 )
+B.SetInertia( Bcm, A, K = 1.0 kg*m^2, J = 2.0 kg*m^2, K )
+C.SetInertia( Ccm, A, K, J, K )
+F.SetInertia( Fcm, E, K, J, K )
+%--------------------------------------------------------------------
+%       Rotational kinematics
+A.RotateZ( N, qA )
+B.SetAngularVelocityAcceleration( A, wB*Ay> )
+C.SetAngularVelocityAcceleration( A, wC*Ay> )
+E.RotateNegativeZ( A, qE )
+F.SetAngularVelocityAcceleration( E, wF*Ey> )
+%--------------------------------------------------------------------
+%       Translational kinematics
+Ao.SetVelocityAcceleration( N,  v*Ax> )
+Acm.Translate( Ao,  a*Ax> + h*Az> )
+Bcm.Translate( Ao, -b*Ay> )
+Ccm.Translate( Ao,  b*Ay> )
+Fcm.Translate( Ao,  e*Ax> )
+BN.Translate( Bcm, -R*Az> )
+CN.Translate( Ccm, -R*Az> )
+FN.Translate( Fcm, -R*Az> )
+Eo.SetPosition( Ao, E*ax> + h*Az> )
+%--------------------------------------------------------------------
+%       Translational kinematics of system center of mass
+sx = Dot( System.GetCMPosition(Ao), Ax> )
+sz = Dot( System.GetCMPosition(Ao), Az> )
+Scm.Translate( Ao,  sx*Ax> + sz*Az> )
+%--------------------------------------------------------------------
+%       Motion constraints (relate qA', wB, wC, wF  to  v, qE')
+Rolling[1] = Dot( BN.GetVelocity(N), Ax> )
+Rolling[2] = Dot( CN.GetVelocity(N), Ax> )
+Rolling[3] = Dot( FN.GetVelocity(N), Ex> )
+Rolling[4] = Dot( FN.GetVelocity(N), Ey> )
+SolveDt( Rolling,  qA', wB, wC, wF )
+%--------------------------------------------------------------------
+%       Replace all gravity forces with single force at Scm
+mTotal = System.GetMass()
+gravityDirection> = sin(theta)*Nx> - cos(theta)*Nz>
+Scm.AddForce( mTotal * g * gravityDirection> )
+%--------------------------------------------------------------------
+%       Relevant torques
+B.AddTorque( A,  TB*Ay> )
+E.AddTorque( A, -TSteer*Az> )
+%--------------------------------------------------------------------
+%       Kane's equations of motion (constraints are embedded)
+DynamicEqns = System.GetDynamicsKane()
+FactorQuadratic( DynamicEqns,  v, qE', v', qE'' )
+%--------------------------------------------------------------------
+%       Output point Ao's position from point No
+Variable x' = Dot( Ao.GetVelocity(N), Nx> )
+Variable y' = Dot( Ao.GetVelocity(N), Ny> )
+Ao.SetPosition( No, x*Nx> + y*Ny> )
+%--------------------------------------------------------------------
+%       Integration parameters
+Input  tFinal = 9.0 sec,  tStep = 0.002 sec,  absError = 1.0E-07
+%--------------------------------------------------------------------
+%       Initial values for variables (released from rest with No and Ao coincident)
+Input  qA = 0 deg,   qE = 0.1 deg,  qE' = 0 rad/sec,  v = 0 m/s,  x = 0 m,  y = 0 m
+
+%********************************************************************
+%       Dynamic simulation with feed-forward control.
+%********************************************************************
+%       Desired motion.
+Constant   accelDesired = 15 km/hour/sec
+Specified  vDesired',  qEDesired''
+SetDt( vDesired = accelDesired * t )
+SetDt( qEDesired = 5 * pi/180 )
+%--------------------------------------------------------------------
+%       Construct feed-forward ControlEqns governing TB and TSteer.
+Constant   kp = 1 rad/sec,   zeta = 1 noUnits,  wn = 1 rad/sec
+Av = Dt(vDesired)  +  kp * (vDesired - v)
+Aq = DtDt(qEDesired) + 2*zeta*wn*Dt(qEDesired - qE) + wn^2 * (qEDesired - qE)
+ControlEqns = Evaluate( DynamicEqns,  v' = Av,  qE'' = Aq )
+%--------------------------------------------------------------------
+%       Simulate vehicle dynamics with feed-forward controller for TB and TSteer.
+OutputPlot  x meters, y meters
+OutputPlot  t sec,  qE degrees,  TB N*m,  TSteer N*m,  v m/s
+ODE( [DynamicEqns; ControlEqns],  v', qE'', TB, TSteer ) MGVehicleTricycleFeedForward
+
+%********************************************************************
+%       Static analysis for braking and steering torques
+%********************************************************************
+%       Kane's equations for statics - with simplification
+ZeroStatics = System.GetStaticsKane()
+ZeroStatics[1] := Expand( ZeroStatics[1] * R*cos(qE) )  % Helps simplify
+StaticTorques = Solve( ZeroStatics,  TB, TSteer )
+
+%********************************************************************
+%       Dynamic simulation with no braking or steering  (forward/stable)
+%********************************************************************
+%       Total mechanical energy (should be conserved)
+KE = System.GetKineticEnergy()
+PE = mTotal*g*Dot( Scm.GetPosition(No), -gravityDirection> )
+MechanicalEnergy = KE + PE
+%--------------------------------------------------------------------
+%       List quantities to be output by ODE command.
+ClearOutputPlot()
+Output      t sec,  qA deg,  qE deg,  v m/s,  MechanicalEnergy Joules
+OutputPlot  t sec,  qA deg,  qE deg
+%--------------------------------------------------------------------
+TB := 0;  TSteer := 0
+ODE( DynamicEqns,  v', qE'' )  MGVehicleTricycleFreeMotionForward
+
+%********************************************************************
+%       Dynamic simulation with no braking or steering  (backward/unstable)
+%       Note: Divide-by-zero at qE = 90 deg causes problems with conservation of MechanicalEnergy
+%********************************************************************
+Input  qA := 180 deg
+OutputPlot  t sec,  MechanicalEnergy  Joules
+ODE( DynamicEqns,  v', qE'' )  HW11_Tricycle
+%--------------------------------------------------------------------
+Save  HW11_Tricycle.html
+Quit

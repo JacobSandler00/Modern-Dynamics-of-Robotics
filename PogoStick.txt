@@ -1,0 +1,41 @@
+NewtonianFrame N
+Particle A , B
+
+Constants g , ma , mb , k , ln , c , khc , bhc , n
+Variables yb'' , ya''
+
+B.Translate(No , yb*ny>)
+A.Translate( B , ya*ny>)
+
+A.SetMass( mA )
+B.SetMass( mB )
+
+A.AddforceGravity(-g*ny>)
+B.AddforceGravity(-g*ny>)
+
+A.AddForce( -k*(ya-ln)*ny>)
+A.AddForce( -c*( ya' )*ny>)
+
+setDt ( x = -yb)
+
+
+B.AddForce( k*(ya-ln)*ny>)
+B.AddForce( c*( ya' )*ny>)
+
+newt[1] = dot(A.GetDynamics() , ny>)
+newt[2] = dot(B.GetDynamics() , ny>)
+
+solve(newt , ya'' , yb'')
+
+input khc = 1e6 , bhc = 1e5 , n = 1.5
+input g = 9.81 m/s^2 , ma = 0.8 kg , mb = 0.2 kg , k = 1000 N/m , ln = 0.25 m , c = 2 N*s/m
+input tFinal = 1 sec , tstep = .005 sec
+
+input ya =  0.35 m , yb = 0.5 m , ya' = 0 , yb' = 0
+
+Outputplot t sec , ya m
+Outputplot t sec , yb m
+
+ODE() PogoStick.m
+
+save PogoStick.html

@@ -1,0 +1,51 @@
+ki% Model
+NewtonianFrame N
+RigidBody A,B,C,D
+
+% Identifier
+Constants LA,LB,LC,R
+Variables x'',y'',qa'',qb'',qc'',qd''
+Point DN(D) , BN(B)
+
+A.RotateZ(N, qa)
+B.RotateZ(A, qb)
+C.RotateZ(A,-qc)
+D.RotateZ(C, qd)
+
+Acm.Translate(No , x*nx>+y*ny>)
+Bcm.Translate(Acm ,-LA/2*ax> - Lb/2*bx>)
+BN.Translate (Bcm , -LB/2*bx>) % ok since its not being redefined
+Ccm.Translate(Acm , LC/2*cx>)
+Dcm.Translate(Ccm , LC/2*cx>)
+DN.Translate(Dcm , -R * ny> , D) % Completely WRONG -
+
+setDt(y = 0.2*cos(pi*t) + 0.65)
+% contact and rolling
+con[1] = dot ( BN.GetVelocity(N) , ny>)
+con[2] = dot ( Bn.GetVelocity(N) , nx>)
+con[3] = dot ( DN.GetVelocity(N) , nx>)
+con[4] = dot ( DN.GetVelocity(N) , ny>)
+con[5] = dot ( B.GetAngularVelocity(A) , nz> )
+
+solve(con ,x',qa',qb',qc',qd')
+
+Input LA = 0.85 m , LB = 0.92 m , LC = 0.65 , R = 0.3 m
+
+% Initial Conditions
+int[1] = dot ( Bn.GetPosition( No ) , nx>)
+int[2] = dot ( Bn.GetPosition( No ) , ny>)
+int[3] = dot ( nx> , dx> ) - 1
+int[4] = dot ( Dn.Getposition( No ) , ny>)
+int[5] = dot ( ax> , bx>) - 1
+
+StartingConditions = Evaluate ( int , t = 0)
+SolveSetInput(StartingConditions , x = 1 m , qa = 30 deg , qb = 10 deg , qc = -45 deg , qd = 15 deg )
+
+input tFinal = 6 sec , tStep = .01 sec
+OutPutPlot t, qa deg , qb deg, qc deg ,qd deg
+OutPutPlot x m , y m
+
+armangle = getAngleBetweenVectors(nx> , cx>)
+OutPutPlot t sec , qa deg , armangle deg
+
+ODE() quizinclass.m

@@ -1,0 +1,25 @@
+NewtonianFrame N
+RigidBody A , B , C , D
+Point BN ( B )
+
+Constant LA = 0.4322 m
+Constant LB = 0.3685 m
+Constant LC = 0.5293 m
+Constant LD = 0.5394 m
+Constant h = 0.10 m
+Constant g = 8.81 m/s^2
+Constant ma = 3.5 kg , mb = 9.1 kg, mc = 26.4 kg, md = 0.85 kg
+Constant Fd = 45 N
+Constant p = .5
+Variable Tan , Tba , Tcb , Tdc , qa'' , qb'' , qc'' , qd''
+
+A.RotateZ(N ,-qa)
+B.RotateZ(N , qb)
+C.RotateZ(N , qc)
+D.RotateZ(N , qd)
+
+Acm.Translate(No , -La/2*ax>)
+Bcm.Translate(Acm, -La/2*ax> - lb/2*bx>)
+BN.Translate( Bcm, - lb/2*bx>)
+Ccm.Translate(BN , - lb/2*bx> + lc/2*cy>)
+Dcm.Translate(ccm, LC/4*cy> + LD/2*dx>)

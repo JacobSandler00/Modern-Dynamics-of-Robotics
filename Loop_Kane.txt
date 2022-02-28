@@ -1,0 +1,76 @@
+% MotionGenesis file:  MGFourBarDynamicsKaneEmbedded.txt
+% Copyright (c) 2009 Motion Genesis LLC.  All rights reserved.
+%--------------------------------------------------------------------
+NewtonianFrame  N
+RigidBody       A, B, C
+Point           BC( B )
+Point           CB( C )
+
+%--------------------------------------------------------------------
+Constant   LN = 1 m,  LA = 1 m
+Constant   LB = 2 m,  LC = 2 m
+Constant   g = 9.81 m/s^2
+Specified  H
+Variable   qA'',  qB'',  qC''
+SetGeneralizedSpeed( qA' )
+%--------------------------------------------------------------------
+A.SetMassInertia( mA = 10 kg,  0,  IA = mA*LA^2/12,  IA  )
+B.SetMassInertia( mB = 20 kg,  0,  IB = mB*LB^2/12,  IB  )
+C.SetMassInertia( mC = 20 kg,  0,  IC = mC*LC^2/12,  IC  )
+
+%--------------------------------------------------------------------
+%   Rotational kinematics.
+A.RotateZ( N,  qA )
+B.RotateZ( N,  qB )
+C.RotateZ( N,  qC )
+
+%--------------------------------------------------------------------
+%   Translational kinematics.
+Ao.Translate(   No,          0> )
+Acm.Translate(  Ao,  0.5*LA*Ax> )
+Bo.Translate(   Ao,      LA*Ax> )
+Bcm.Translate(  Bo,  0.5*LB*Bx> )
+BC.Translate(   Bo,      LB*Bx> )
+Co.Translate(   No,      LN*Ny> )
+Ccm.Translate(  Co,  0.5*LC*Cx> )
+CB.Translate(   Co,      LC*Cx> )
+
+%--------------------------------------------------------------------
+%   Add relevant forces (replace gravity forces with equivalent set). = 200 - 800*qc'
+H = 200 - 80*qc'
+Bo.AddForce( 0.5*(mA+mB)*g*Nx> )
+CB.AddForce( 0.5*(mB+mC)*g*Nx> + H*Ny> )
+
+%--------------------------------------------------------------------
+%   Configuration (loop) constraints and their time-derivatives.
+Loop> = LA*Ax> + LB*Bx> - LC*Cx> - LN*Ny>
+Loop[1] = Dot( Loop>, Nx> )
+Loop[2] = Dot( Loop>, Ny> )
+
+%--------------------------------------------------------------------
+%   Use the loop constraints to solve for initial values of qB, qC and qB',qC'
+%   (results depend on constants and initial values of qA and qA').
+Input  qA = 30 deg,  qA' = 0 rad/sec
+EMBED = SolveSetInputDt( Loop = 0,   qB = 60 deg,  qC = 20 deg )
+
+%--------------------------------------------------------------------
+%   Equations of motion with Kane's method (Optional: Solve for qA'').
+Dynamics = System.GetDynamicsKane()
+Solve( Dynamics = 0,   qA'' )
+
+%--------------------------------------------------------------------
+%   Numerical integration parameters.
+Input  tFinal = 7 sec,  tStep = 0.02 sec,  absError = 1.0E-07
+
+%--------------------------------------------------------------------
+%   List quantities to be output from ODE.
+OutPutPlot  t sec,  qA deg,  qB deg,  qC deg
+
+%--------------------------------------------------------------------
+%   Solve ODEs (plot results).
+ODE()  Loop_Kane
+%
+
+%--------------------------------------------------------------------
+%   Save input together with program responses.
+Save Loop_Kane.html

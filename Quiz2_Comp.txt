@@ -1,0 +1,51 @@
+NewtonianFrame N
+RigidBody A , B , C , D
+Point Bn ( B ) , Dn ( D )
+
+Constant LA , LB , LC , R
+Variables x'' , qa'' , qb'' , qc'' , qd''
+Specified y''
+
+A.RotateZ(N , qa)
+B.Rotatez(A , qb)
+C.RotateZ(A , -qc)
+D.RotateZ(C , qd)
+
+Bn.Translate(No , 0>)
+Bcm.Translate(Bn , LB/2*bx>)
+Acm.Translate(Bn , x*nx> + y*ny>)
+Ccm.Translate(Bn , LB*bx> + LA/2*ax> + LC/2*cx>)
+Dcm.Translate(Bn , LB*bx> + LA/2*ax> + LC*cx>)
+Dn.Translate(Dcm , -R*ny>)
+
+out[1] = SetDt(outx = dot(Acm.GetPosition(Bn),nx>))
+out[2] = SetDT(outy = dot(Acm.GetPosition(Bn),ny>))
+
+BnToDn> = Dn.GetPosition(Bn)
+N_V_Dn> = Dn.GetVelocity(N)
+
+ContactCNST = dot(BnToDn> , ny>)
+DtContactCNST = dt(ContactCNST)
+RollingCNST[1] = dot(Dn.GetVelocity(N), nx>)
+RollingCNST[2] = dot(D.GetAngularVelocity(N), nz>)
+
+setDt(OrientationCNST = cos(qb) - 1)
+
+Input LA = 0.85 m , LB = 0.92 m , LC = 0.65 m , R = 0.30 m
+Input tFinal = 6.0 s , tStep = 0.01 s
+%Input y = 0.85 m
+
+solveDt(OrientationCNST , qb = 0 degrees)
+solveDt([RollingCNST ; DtContactCNST],qa',qc',qd')
+SolveSetInput(out , qa = 8 deg , qc = 3 deg)
+%Solve(out , qa = 8 degrees )
+
+OutPutPlot x m , y m
+OutPutPlot t s , qa degrees
+OutPutPlot t s , qb degrees
+OutPutPlot t s , qc degrees
+OutPutPlot t s , qd degrees
+
+ODE() Robotics_Quiz2.m
+
+save Robotics_Quiz2.html

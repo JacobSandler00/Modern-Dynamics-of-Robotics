@@ -1,0 +1,60 @@
+% Modeling & Identifiers ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+SetAutoOverwrite(ALL)
+NewtonianFrame N
+RigidBody A , B , C
+Point CD ( C ) , Do
+Constant g , mA , mB , mC , IzzA , IzzB , IzzC
+Constant LA , LB , LC , LX , LY , LD
+Constant w , FD
+Variables qa'' , qb'' , qc'', Tan , Tba , Tcb
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+% Physics ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A.RotateZ(N , qa)
+B.RotateZ(N , qb)
+C.RotateZ(N , qc)
+
+Do.Translate(no , ly*ny> +lx*nx>)
+Acm.Translate(No ,-La/2*ay>)
+Bcm.Translate(Acm ,-La/2*ay> - LB/2*by>)
+Ccm.Translate(Bcm ,-LB/2*by> - LC/2*cy>)
+CD.Translate(Ccm ,-LC/2*cy>)
+
+A.SetMassInertia( mA , 0 , 0 , IzzA)
+B.SetMassInertia( mB , 0 , 0 , IzzB)
+C.SetMassInertia( mC , 0 , 0 , IzzC)
+System.AddForceGravity(-g*ny>)
+
+A.AddTorque(N , TAN*nz>)
+B.AddTorque(A , TBA*nz>)
+C.AddTorque(B , TCB*nz>)
+FD = 10 / LD
+CD.AddForce( -FD * GetUnitVector(Cd.GetVelocity(N)))
+
+CrankAngle = GetAngleBetweenVectors(nx> ,-cy>)
+PetalingRate = w * t + 130*pi/180
+
+xC = dot(Do.GetPosition(No) , nx>)
+yC = dot(Do.GetPosition(No) , ny>)
+Xcircle = LD*cos(PetalingRate) + xC
+Ycircle = LD*sin(PetalingRate) + yC
+
+CIRC[1] = dot(CD.GetPosition(No) , nx>) - xCircle
+CIRC[2] = dot(CD.GetPosition(No) , ny>) - ycircle
+CIRC[3] = qc - 86*pi/180
+
+solveDt(dt(CIRC) , qa' , qb', qc')
+
+System.SetGeneralizedSpeeds(qa' , qb' , qc')
+KANE = System.GetDynamicsKane()
+Solve(KANE , TAN , TBA , TCB)
+
+Input LX = .222 m , LY  = -.675 , g = 9.8 m/s^2
+
+SolveSetInput(evaluate(CIRC , t = 0)  , qa = 45 deg , qb = -35 deg , qc = 85 deg)
+
+% ODE() Bi_Crank
+% OutPutPlot t sec , qa rad , qb rad , qc rad
+% OutPutPlot t sec Tan N*m , TBa N*m , TCB N*m
+%

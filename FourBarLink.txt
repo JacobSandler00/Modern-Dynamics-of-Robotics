@@ -1,0 +1,30 @@
+% Filename : FourBarLink.txt
+
+% Initial Construction
+NewtonianFrame N
+RigidFrame A , B , C  % Creates x> y> z>
+
+Constants LA , LB , LC , LN
+
+
+Variables qa , qb , qc
+
+
+% ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+% Kinematics
+
+A.RotateZ(N , qa)
+B.RotateZ(N , qb)
+C.RotateZ(N , qc)
+
+Loop> = LA*ax> + LB*bx> -LC*cx> - LN*ny>
+
+% Going to Scalar Equations
+
+EQN[1] = dot(Ax> , Loop>)
+EQN[2] = dot(Ay> , Loop>)
+
+input qa = 30 degrees , LA = 1 m , LB = 2 m , LC = 2 m , LN = 1 m
+
+solve(EQN , qb = 20 degrees , qc = 70 degrees)

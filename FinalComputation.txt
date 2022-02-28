@@ -1,0 +1,120 @@
+NewtonianFrame N
+RigidBody A , B , C , D , E
+Particle Q
+Point DE ( D ) , BC ( B )
+Constants g , mBox , mBody
+Constants qa1 , qa2 , qb1 , qb2  , qc1 , qc2 , qd1 , qd2
+
+Constant LA = 432.3 mm
+Constant LB = 368.5 mm
+Constant LC = 529.3 mm
+Constant LD = 275.1 mm
+Constant LE = 264.3 mm
+Constants rpa , rpb , rpc , rpd , rpe , ra , rb , rc,rd, re
+Constants mpa, mpb, mpc, mpd, mpe , ma , mb , mc , md , me
+Constants Ia , Ib , Ic , Id , Ie
+Variables qa'' , qb'' , qc'' , qd'' , qe'' , TAN , TBA , TCB , TDC , TED
+
+A.RotateZ(N ,-qa)
+B.RotateZ(N , qb)
+C.RotateZ(N ,-qc)
+D.RotateZ(N , qd)
+E.RotateZ(N , qe)
+
+Acm.Translate( No , LA/2*ay>)
+Bcm.Translate( Acm , LA/2*ay> + LB/2*by>)
+Ccm.Translate( Bcm , LB/2*by> + LC/2*cy>)
+Dcm.Translate( Ccm , LC/2*cy> + LD/2*dx>)
+Ecm.Translate( Dcm , LD/2*dx> + LE/2*ex>)
+Q.Translate( Ecm , LE/2*ex>)
+DE.Translate( Dcm , LD/2*dx>)
+BC.Translate( Bcm , LB/2*by>)
+
+A.SetMassInertia(ma , 0 , 0 , Ia)
+B.SetMassInertia(mb , 0 , 0 , Ib)
+C.SetMassInertia(mc , 0 , 0 , Ic)
+D.SetMassInertia(md , 0 , 0 , Id)
+E.SetMassInertia(me , 0 , 0 , Ie)
+Q.SetMass(mBox)
+
+System.AddForceGravity(-g*ny>)
+
+A.AddTorque( N , TAN*nz>)
+B.AddTorque( A , TBa*nz>)
+C.AddTorque( B , TCB*nz>)
+D.AddTorque( C, TDC*nz>)
+E.AddTorque( D, TED*nz>)
+
+CNST = dot(Q.GetPosition(no) , ny>) - spline(TRANSITION , t , 0 , 3 , 0 , 1.2)
+solveDt(dt(cnst) , qe')
+
+INITIAL[1] = qa - qb
+INITIAL[2] = qd - qe
+INITIAL[3] = qc - 50*pi/180
+INITIAL[4] = qa - 80*pi/180
+
+FINAL[1] = qc - 10*pi/180
+FINAL[2] = qa - 15*pi/180
+FINAL[3] = dot(BC.GetPosition(No), nx>)
+FINAL[4] = dot(Q.GetPosition(No) , nx>) - .26
+
+
+START = solve(evaluate([INITIAL ; CNST],t =0 s) , qa = 80 deg , qb = 80 deg , qc = 50 deg , qd = 100 deg , qe = 100 deg)
+
+END = solve(evaluate([FINAL ; CNST] , t = 3 s) , qa = 15 deg , qb  = 27 deg , qc = 10 deg , qd = 15 deg , qe = 100 deg)
+
+qa1 = START[1]
+qb1 = START[2]
+qc1 = START[3]
+qd1 = START[4]
+qe1 = START[5]
+
+qa2 = END[1]
+qb2 = END[2]
+qc2 = END[3]
+qd2 = END[4]
+qe2 = END[5]
+
+setDt(qa = spline(TRANSITION , t , 0 , 3 , qa1 , qa2))
+setDt(qb = spline(TRANSITION , t , 0 , 3 , qb1 , qb2))
+setDt(qc = spline(TRANSITION , t , 0 , 3 , qc1 , qc2))
+setDt(qd = spline(TRANSITION , t , 0 , 3 , qd1 , qd2))
+setDt(qe = spline(TRANSITION , t , 0 , 3 , qe1 , qe2))
+
+% solveSetinput(evaluate(CNST , t = 0 ), qe = 4.23 rad)
+
+system.SetGeneralizedSpeed(qa',qb',qc',qd',qe')
+KANE = System.GetDynamicsKane()
+%RM = dot(System.GetDynamics(No) , nz>)
+
+solve(KANE , TAN , TBA , TCB , TDC , TED)
+
+input tfinal = 3 s , tstep = .01 s
+Input g = 9.81 m/s^2 , mBox = 5 kg , mBody = 61.9 kg
+Input mpa = .0481, mpb = .1478, mpc = .4257, mpd =.0255, mpe = .0138
+Input rpa = .093, rpb = .162, rpc = .171, rpd =.148, rpe =.094
+
+
+Input rA = evaluateatinput(LA * rpa)
+Input rB = evaluateatinput(LB * rpb)
+Input rC = evaluateatinput(LC * rpc)
+Input rD = evaluateatinput(LD * rpd)
+Input rE = evaluateatinput(LE * rpe)
+
+Input ma = evaluateatinput(mBody * mpa)
+Input mb = evaluateatinput(mBody * mpb)
+Input mc = evaluateatinput(mBody * mpc)
+Input md = evaluateatinput(mBody * mpd)
+Input me = evaluateatinput(mBody * mpe)
+
+Input Ia = evaluateatinput((mBODY * ma)*(la*ra)^2)
+Input Ib = evaluateatinput((mBODY * mb)*(lb*rb)^2)
+Input Ic = evaluateatinput((mBODY * mc)*(lc*rc)^2)
+Input Id = evaluateatinput((mBODY * md)*(ld*rd)^2)
+Input Ie = evaluateatinput((mBODY * me)*(le*re)^2)
+
+OutPutPlot t sec, tan ,tba , tcb , tdc , ted ,
+OutPutPlot t sec , qa deg , qb deg , qc deg , qd deg , qe deg
+variable dumb' = .1234
+input dumb = 0
+ode() FInalComputation.m

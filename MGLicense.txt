@@ -1,0 +1,26 @@
+f325c01c590da9fbcf8d743c4a26c3042582a91839738420a0d46483b0d4008b50d29ecd15ae67ac047796220544f27dc1c66225524d8abf629e9404e80f42469b9ac13739fec6bff0e83c59614e0c57fff259db13b3b26b082b5a1efb36e71f372e166998ed6585a09b5c49d0108458c661a9c2f796fdb8fc142
+02421666369738703626618614488455505955119238722499087207675472527870524535564482842568325065804604638222110625526752412935803685757515504911051566195249442795026869032492446292428411153948257654371618
+---------------------------------------------------------------------
+ Memory type:           Student
+ Machine type:          Windows PC 32/64-bit
+ Program version:       6.x  (created for 6.1)
+ License generated on:  Aug 30 2021
+ Expiration date:       August 2024
+ # of licensed users:   001
+ Licensed User Name:    Jacob Sandler
+ Organization/school:   Temple University
+ Full ComputerID:       bd61Jacob Sandler~~Temple University~~00I00FIu000uIp0x00000000006xlpqvm5DwOz%gu5ZWoH
+---------------------------------------------------------------------
+Note: This license is valid for only one MotionGenesis end-user (Jacob Sandler).
+---------------------------------------------------------------------
+Please put the file  MGLicense.txt  into your computer's  MotionGenesis  folder.
+Next, double-click on MotionGenesisStartHere.
+ 
+There are 2-minute  Get-Started  exercises at:
+http://www.MotionGenesis.com   (click on Get-Started). 
+ 
+The file  MGTutorial.pdf  is in your computer's  MGToolbox  folder.
+ 
+To install, follow the step-by-step installation and licensing instructions at:
+http://www.MotionGenesis.com/MGWebSite/MGFAQ/MGInstallAndLicense.html
+---------------------------------------------------------------------

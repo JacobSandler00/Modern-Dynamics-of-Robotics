@@ -1,0 +1,33 @@
+NewtonianFrame N
+RigidBody A,B,C,D
+Point Dn ( D ) , Bn ( N )
+
+Constants LA, LB, LC, R, F, C, A
+Variables x'', qb'', qc'', qd'', qa''
+Specified y''
+
+
+A.RotateZ(N, qa)
+B.RotateZ(A, qb)
+C.RotateZ(A,-qc)
+D.RotateZ(C, qd)
+
+Bcm.Translate(Bn,LB/2*bx>)
+Acm.Translate(Bn,x*nx>+y*ny>)
+Ccm.Translate(Bn,LB*bx>+LA/2*ax>+LC/2*cx>)
+Dcm.Translate(Bn,LB*bx>+LA/2*ax>+LC*cx>)
+Dn.Translate(Dcm,-R*ny>)
+
+NoAcm> = Acm.GetPosition(Bn)
+NoBcm> = Bcm.GetPosition(Bn)
+
+CNST[1] = dot(Dcm.GetVelocity(N),ny>)
+CNST[2] = GetAngleBetweenVectors(NoAcm> , NoBcm>)
+CNST[3] = dot(Dn.GetPosition(Bn),ny>)
+CNST[4] = dot(Dcm.GetPosition(Bn),ny>)
+CNST[5] = dot(A.GetAngularVelocity(N),nz>)
+
+SetDt (qa' = .5 * 2*pi )
+SetDt (y = C + A)
+
+solve(CNST,x,qb,qc,qd,qa)

@@ -1,0 +1,12 @@
+NewtonianFrame B
+
+Variable Vx' , Vy' , Vz' , wx , wy , wz , ax , ay , az
+
+w> = wx*bx> + wy*by> + wz*bz>
+a> = ax*bx> + ay*by> + az*bz>
+v> = vx*bx> + vy*by> + vz*bz>
+
+dvt> = dt(v>,B)
+
+
+newA> = dvt> + cross(w>,v>)

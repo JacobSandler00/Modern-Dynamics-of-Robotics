@@ -1,0 +1,49 @@
+% MotionGenesis file:  MGMetronomePendulumDynamics.txt
+% Problem:  Equation of motion for two-particle metronome.
+% Copyright (c) 2017 Motion Genesis LLC.  All rights reserved.
+%--------------------------------------------------------------------
+NewtonianFrame N             % Earth with point No at metronome pivot.
+RigidFrame     B             % Metronome rod.
+Particle       Q1, Q2        % Particles fixed at distal ends of B.
+%--------------------------------------------------------------------
+Variable  theta''            % Metronome angle and 1st/2nd derivative.
+Constant  L = 0.2 m          % Distance between point No and Q1.
+Constant  h = 0.1456 m       % Distance between point No and Q2.
+Constant  g = 9.8 m/s^2      % Earth's gravitational acceleration.
+Constant  k = 2 N*m/rad      % Torsional spring constant.
+Q1.SetMass( m1 = 0.1 kg )
+Q2.SetMass( m2 = 0.02 kg )
+%--------------------------------------------------------------------
+%   Rotational kinematics.
+B.RotateNegativeZ( N, theta )
+%--------------------------------------------------------------------
+%   Translational kinematics.
+Q1.Translate( No, -L*By> )
+Q2.Translate( No,  h*By> )
+%--------------------------------------------------------------------
+%   Relevant contact/distance forces and torques.
+System.AddForceGravity( -g*Ny> )
+B.AddTorque( k*theta*Bz> )
+%--------------------------------------------------------------------
+%   Euler's equation of motion (angular momentum principle about No).
+Dynamics = Dot( System.GetDynamics(No), -Bz> )
+FactorLinear( Dynamics,  theta'' )
+%--------------------------------------------------------------------
+%   Conservation of mechanical energy.
+KineticEnergy = System.GetKineticEnergy()
+PotentialEnergyGravity = System.GetForceGravityPotentialEnergy( -g*Ny>, No )
+PotentialEnergySpring = 1/2 * k * theta^2
+PotentialEnergy = PotentialEnergyGravity + PotentialEnergySpring
+MechanicalEnergy = KineticEnergy + PotentialEnergy
+%--------------------------------------------------------------------
+%   Optional: Equations of motion with Lagrange's method.
+SetGeneralizedCoordinate( theta )
+LagrangeDynamics = System.GetDynamicsLagrange( SystemPotential = PotentialEnergy )
+%--------------------------------------------------------------------
+%   Optional: Equations of motion with Kane's method.
+SetGeneralizedSpeed( theta' )
+KaneDynamics = System.GetDynamicsKane()
+FactorLinear( KaneDynamics,  g )
+%--------------------------------------------------------------------
+%   Save input and program responses.
+Save METRO.html

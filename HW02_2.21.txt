@@ -1,0 +1,65 @@
+% HW 2 -- Problem 2.21
+
+% Initial Construction of Problem
+
+NewtonianFrame N                    % Introduces nx> ny> nz> No
+RigidBody B
+Point NC( N ) , BC( B )                 % Important Points
+
+Constant LN , LB , LA               % Lengths
+LN = 15
+LB = 7
+LA = 7
+
+
+
+
+Variables LC , TA                   % Solving For LC = length of C , TA = angle of cable a
+
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+% Kinematics
+
+NC.SetPosition( No,  LN*Nx> )
+Bo.SetPosition( No,  LA*sin(TA)*Nx> - LA*cos(TA)*Ny> )
+BC.SetPosition( Bo,  LB*Nx> )
+Bcm.SetPosition( Bo,  0.25*LB*Nx> )
+
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+% Statics
+
+Variables tenA , tenC              % tensions in rope A & C
+B.SetMass(m = 100 kg)
+Constant G = 9.8 m/s^2
+
+
+p> = Nc.GetPosition( BC )
+LengthConstraint = LC^2 - Dot( p>, p> )           % LengthConstraint = 0.
+
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+% Forces Acting on Beam
+
+unitVectorFromBoToNo> = No.GetPositionVector(Bo) / LA
+unitVectorFromBcToNc> = NC.GetPositionVector(Bc) / LC
+Bo.AddForce( tenA * unitVectorFromBoToNo> )
+BC.AddForce( tenC * unitVectorFromBcToNc> )
+Bcm.AddForce( -m*g*Ny> )
+
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+% Static Equilibrium
+
+Statics[1] = Dot( Nx>,  B.GetResultantForce()    )  % Net force on B in Nx> direction is zero.
+Statics[2] = Dot( Ny>,  B.GetResultantForce()    )  % Net force on B in Ny> direction is zero.
+Statics[3] = Dot( Nz>,  B.GetResultantMoment(Bo) )  % Moment on B about Bo in Nz> direction is zero.
+
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+% Solve
+
+Solve( [LengthConstraint; Statics] = 0,   TA = 30 degrees,  tenA = m*g/2, tenC = m*g/2, LC = LA )
+
+save HW02_2.21.html
+quit

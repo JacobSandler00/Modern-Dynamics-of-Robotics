@@ -1,0 +1,51 @@
+% Spring_Particle.txt
+% Ball on a spring
+% MIPSI
+% Modeling, Identifiers, Physics, simply/Solve, Interpret
+
+% Modeling ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+NewtonianFrame N
+RigidFrame B
+Particle Q
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+% Identifiers ~~~~~~~~~~~~~~~~~~~~~~~~~~
+Constants m ,g , Ln, k
+Variables y'',theta''
+
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+% Physics ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% (Translational , Rotational Kinematics )
+B.RotateZ(N,theta)
+Q.Translate(No, -(Ln+y)*by>)
+% (Mass & Intertia Properties)
+Q.SetMass(m)
+% (External Forces & Torques)
+Q.AddForce(No, k*y*by>)
+System.AddForceGravity( -g*ny>)
+
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+% Dynamics
+
+Newton> = System.GetDynamics()
+
+EQN[1] = dot(Newton>,nx>)
+EQN[2] = dot(Newton>,ny>)
+
+solve(EQN, [y'' , theta''])
+
+
+Input m =2 kg , g = 9.81 m/s^2 , Ln = .25 m , k = 47690 N/m
+Input theta = 10 deg , theta' = 0 , y =0.35 m , y' = 0 m/s
+Input tFinal = 10 s , tStep = .1 s
+
+outputx = dot(Q.GetPosition(No),nx>)
+outputy = dot(q.GetPosition(No),ny>)
+Outputplot outputx m , outputy m
+Outputplot t sec , outputx m , outputy m
+ODE() SpinningParticle.m
+
+save SpringSpringParticleInClass.html

@@ -1,0 +1,46 @@
+% MotionGenesis file: MGStationaryHelicopterRetrievalDynamics.txt
+% Problem: Retrieval of capsized fishermen.
+% Copyright (c) 2009 Motion Genesis LLC.  All rights reserved.
+%------------------------------------------------------------
+NewtonianFrame N             % Earth.
+RigidFrame     B             % Cable.
+Particle       Q             % Rescue basket and fishermen.
+%------------------------------------------------------------
+Q.SetMass( m = 100 kg )
+Constant   g = 9.8 m/s^2     % Earth's gravitational acceleration.
+Variable   theta''           % Pendulum swing angle.
+Variable   Tension           % Tension in cable.
+Constant   L0 = 50 m         % Initial cable length.
+Constant   s = 2 m/s         % Rate at which cable is retrieved.
+Specified  L''               % Cable length (varies).
+SetDt( L = L0 - s*t )
+%------------------------------------------------------------
+%   Rotational kinematics.
+B.RotateZ( N, theta )
+%------------------------------------------------------------
+%   Translational kinematics.
+Q.Translate( No, -L*By> )
+%------------------------------------------------------------
+%   Add relevant contact and distance forces.
+Q.AddForce( -m*g*Ny> + Tension*By> )
+%------------------------------------------------------------
+%   Equations of motion with  F = m * a.
+Dynamics = Dot( Bx>,  Q.GetDynamics() )
+%------------------------------------------------------------
+%   Optional: Equations of motion with Kane's method.
+SetGeneralizedSpeed( theta' )
+KaneDynamics = System.GetDynamicsKane()
+%------------------------------------------------------------
+%   Solve dynamic equation for theta''.
+Solve( Dynamics = 0,   theta'' )
+%------------------------------------------------------------
+%   Input initial values and numerical integration parameters.
+Input  theta = 1 deg,  theta' = 0 deg/sec
+Input  tFinal = 24.92 sec,  tStep = 0.02 sec
+%------------------------------------------------------------
+%   List output quantities and solve ODEs.
+OutputPlot  t sec,  theta deg
+OutputPlot t sec , L m
+ODE() Heli.m
+%------------------------------------------------------------
+Save Heli.html

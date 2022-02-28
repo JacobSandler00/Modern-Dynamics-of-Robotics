@@ -1,0 +1,20 @@
+NewtonianFrame N
+RigidBody A , B , C , D , E , F
+
+Constant LA , LB , LC , LD , LE , LF
+Constant mA , mB , mC , mD , mE , mF
+Constant H
+
+Variables qa'' , qb'' , qc'' , qd'' ,qe'' ,qf''
+Variables TAN , TBA , TCB , TDC , TDB , TFD
+
+A.RotateZ( N , qa)
+B.RotateZ( A ,-qb)
+C.RotateZ(B , qc)
+D.RotateZ(C , qd)
+E.RotateZ(B , qe)
+F.RotateZ(E , qf)
+
+Ao.Translate( No , H *ny>)
+Acm.Translate(Ao , LA/2*ax>)
+Bcm.Translate(Acm , LA/2*ax>)

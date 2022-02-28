@@ -1,0 +1,52 @@
+NewtonianFrame  N
+Particle        Q
+RigidFrame      B
+%----------------------------
+Variable   y''
+Variable   q''
+Constant   g = 9.8 m/s^2
+Constant   k = 100 N/m
+Constant   Ln = 0.5 m
+Q.SetMass( m = 1 kg )
+%--------------------------------------------------------------------
+%   Rotational kinematics.
+B.RotateZ( N,  q )
+%--------------------------------------------------------------------
+%   Translational kinematics.
+Q.Translate( No,  -(Ln+y)*By> )
+%--------------------------------------------------------------------
+%   Add relevant contact and distance forces.
+Q.AddForce(  -m*g*Ny>  +  k*y*By> )
+%--------------------------------------------------------------------
+%   Equations of motion via F = m*a.
+Dynamics[1] = Dot(  Bx>,  Q.GetDynamics() )
+Dynamics[2] = Dot( -By>,  Q.GetDynamics() )
+%--------------------------------------------------------------------
+%   Kinetic and potential energy.
+KineticEnergy = System.GetKineticEnergy()
+PEGravity = Q.GetForceGravityPotentialEnergy( -g*Ny>, No )
+PESpring = 1/2*k*y^2
+PotentialEnergy = PEGravity + PESpring
+MechanicalEnergy = KineticEnergy + PotentialEnergy
+%------------------------------------------------------------
+%   Optional: Equations of motion with Lagrange's method.
+SetGeneralizedCoordinates( q,  y )
+LagrangeDynamics = System.GetDynamicsLagrange( systemPotential = PotentialEnergy )
+%------------------------------------------------------------
+%   Optional: Equations of motion with Kane's method.
+SetGeneralizedSpeed( q', y' )
+KaneDynamics = System.GetDynamicsKane()
+%--------------------------------------------------------------------
+%   Solve dynamic equations for q'', y''.
+Solve( Dynamics = 0,   q'', y'' )
+%--------------------------------------------------------------------
+%   Integration parameters and initial values.
+Input  tFinal = 16 sec,  tStep = 0.01 sec,  absError = 1.0E-07
+Input  q = 1.0 deg,  q'=0 deg/sec,  y = 0.2 m,  y' = 0 m/s
+%--------------------------------------------------------------------
+%   List output quantities and solve ODEs.
+OutputPlot  t sec,  q deg
+ODE() HW10_215
+%--------------------------------------------------------------------
+Save HW10_215.html
+Quit

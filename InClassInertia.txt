@@ -1,0 +1,29 @@
+% (Model) Physical Objects
+NewtonianFrame N
+RigidBody B
+
+% Identifiers - Symbols
+Constant mB , Ixx , Iyy , Izz
+Variables wx' , wy' , wz'
+
+ % Physics , Kinematics & Kinetics
+B.SetAngularVelocityAcceleration(N,wx*bx> + wy*by> + wz*bz>)
+B.SetMassInertia(mB , Ixx , Iyy , Izz)
+
+% Solving
+Euler> = B.GetDynamics(Bcm)
+
+EQN[1] = dot(Euler> , bx>)
+EQN[2] = dot(Euler> , by>)
+EQN[3] = dot(Euler> , bz>)
+
+solve(EQN , wx' , wy' , wz')
+
+
+% Input gives boundry conditions for an ode
+Input Ixx = 1 kg*m^2 , Iyy = 2 kg*m^2 , Izz = 4 kg*m^2
+Input wx = 0.2 rad/sec , wy = 7 rad/sec , wz = 0.2 rad/sec
+Input tFinal = 4 seconds , tStep = .1 seconds
+OutputPlot t seconds , wx rad/sec , wy rad/sec , wz rad/sec
+
+ODE() SpinningBookInClass.m

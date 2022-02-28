@@ -1,0 +1,24 @@
+NewtonianFrame N
+Particle B
+
+Constants m , g ,
+Variables y''
+
+B.Setmass ( m )
+
+B.Translate( No , y*ny> )
+
+System.AddforceGravity ( -g*ny> )
+
+newton> =  B.GetDynamics ( )
+
+
+eqn[1]  = dot ( newton>  , ny>)
+
+solve( Eqn , y'')
+
+input y = 0.25 m , y' = 0 m/s, g = 9.8 m/s^2
+Outputplot t sec , y m
+input tfinal = 2 sec , tstep = 0.01
+
+ODE() BB.m

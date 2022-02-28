@@ -1,0 +1,165 @@
+% Modeling & Identifiers ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+SetAutoOverWrite(ALL)
+
+NewtonianFrame N
+RigidBody A , B , C , D , E , F
+RigidFrame R
+
+Point Q ( F ) , P( R ) , BA ( B ) , CB ( C ) , DC ( D ) , ED ( E ) , FE ( F )
+
+Constants  g , LA , LB , LC , LD , LE , LF
+Constants mA , mB , mC , mD , mE , mF
+Constants IxxA , IzzB , IzzC , IzzD , IyyE , Izzff
+Constants r , qxi , qyi , qzi , px , py , pz , hA
+Constants FN
+Constant v , qr
+
+Variables qa'' , qb'' , qc'' , qd'' , qe'' , qf''
+Variables TA , TB , TC , TD , TE , TF
+
+% Physics ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A.RotateX( N , qa )
+B.RotateZ( A ,-qb )
+C.RotateZ( B , qc )
+D.RotateZ( C ,-qd )
+E.RotateY( D , qe )
+F.RotateZ( E , qf )
+R.RotateZ( N ,-qr )
+
+ Ao.Translate( No  , hA*ny>)
+Acm.Translate( Ao  , LA/2*ax> )
+ BA.Translate( Acm , LA/2*ax> )
+ Bcm.Translate( BA ,-LB/2*bx> )
+ CB.Translate( Bcm ,-LB/2*bx> )
+Ccm.Translate( CB  , LC/2*cx> )
+ DC.Translate( Ccm , LC/2*cx> )
+Dcm.Translate( DC  , LD/2*dx> )
+ ED.Translate( Dcm , LD/2*dx> )
+Ecm.Translate( ED  ,-LE/2*ey> )
+ FE.Translate( Ecm ,-LE/2*ey> )
+Fcm.Translate( FE  , LF/2*fx> )
+  Q.Translate( Fcm , LF/2*fx> )
+  P.Translate( No  , px*nx> + py*ny> + pz*nz>)
+
+
+QX = dot(Q.GetPosition(No) , nx>)
+QY = dot(Q.GetPosition(No) , ny>)
+QZ = dot(Q.GetPosition(No) , nz>)
+
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+IxxA = ( 1/2) * mA * r^2
+IyyA = (1/12) * mA * (3*r^2 + LA^2)
+IzzA = (1/12) * mA * (3*r^2 + LA^2)
+
+IxxB = ( 1/2) * mB * r^2
+IyyB = (1/12) * mB * (3*r^2 + LB^2)
+IzzB = (1/12) * mB * (3*r^2 + LB^2)
+
+IxxC = ( 1/2) * mC * r^2
+IyyC = (1/12) * mC * (3*r^2 + LC^2)
+IzzC = (1/12) * mC * (3*r^2 + LC^2)
+
+IxxD = ( 1/2) * mD * r^2
+IyyD = (1/12) * mD * (3*r^2 + LD^2)
+IzzD = (1/12) * mD * (3*r^2 + LD^2)
+
+IxxE = (1/12) * mE * (3*r^2 + LE^2)
+IyyE = ( 1/2) * mE * r^2
+IzzE = (1/12) * mE * (3*r^2 + LE^2)
+
+IxxF = ( 1/2) * mF * r^2
+IyyF = (1/12) * mF * (3*r^2 + LF^2)
+IzzF = (1/12) * mF * (3*r^2 + LF^2)
+
+A.SetMassInertia ( mA = 25 kg , IxxA , IyyA , IzzA )
+B.SetMassInertia ( mB = 25 kg , IxxB , IyyB , IzzB )
+C.SetMassInertia ( mC = 10 kg , IxxC , IyyC , IzzC )
+D.SetMassInertia ( mD =  5 kg , IxxD, IyyD , IzzD )
+E.SetMassInertia ( mE =  5 kg , IxxE , IyyE , IzzE )
+F.SetMassInertia ( mF =  5 kg , IxxF , IyyF , IzzF )
+
+System.AddForceGravity( -g*ny> )
+
+A.AddTorque( N , TA*nx> )
+B.AddTorque( A , TB*az> )
+C.AddTorque( B , TC*bz> )
+D.AddTorque( C , TD*cz> )
+E.AddTorque( D , TE*dy> )
+F.AddTorque( E , TF*ez> )
+
+CNST[1] = dot(q.GetVelocity(N) , rx>) - v
+CNST[2] = dot(q.GetVelocity(N) , ry>) - 0
+CNST[3] = dot(q.GetVelocity(N) , rz>) - 0
+%CNST[4] = dot(F.GetAngularVelocity(N) , nx>)
+%CNST[5] = dot(F.GetAngularVelocity(N) , ny>)
+%CNST[6] = dot(F.GetAngularVelocity(N) , nz>)
+
+setDT(qA' = 0)
+setDT(qE' = 0)
+setDT(qF' = 0)
+solveDt(CNST , qb' , qc' , qd')
+
+Final_Loc>   = evaluateatinput(express(q.getposition(No),N) , qa = 30 deg , qb = 180 deg , qc = 180 deg , qd = 0 deg , qe = 0 deg, qf = -45 deg)
+
+px = dot(Final_Loc>, nx>)
+py = dot(Final_Loc>, ny>)
+pz = dot(Final_Loc>, nz>)
+
+Input qa = 30 deg , qb = 180 deg , qc = 180 deg , qd = 0 deg , qe = 0 deg, qf = -45 deg
+Input  g = 3.721 m/s^2 , LA = 0.5 ft, LB = 2 ft , LC = 2 ft , LD = 1 ft, LE = .5 ft, LF = 1 ft
+Input mA = 25 kg , mB = 25 kg , mC = 10 kg , mD = 5 kg , mE = 5 kg , mF = 5 kg
+Input r = .05 m ,  hA = 3 ft
+Input FN = 120 lbf , v = .3 m/s , qr = 45 deg
+Input tinitial = 15 s , tfinal = 20 s , tstep = .02 s
+
+Variable dumb' = 0.1234
+Input dumb = 0
+
+System.SetGeneralizedSpeed(qa' , qb' , qc' , qd' , qe' , qf')
+kaneEQN = System.GetDynamicsKane()
+solve(kaneEQN ,TA , TB , TC , TD , TE , TF)
+
+AoX = dot(Ao.GetPosition(No) , nx>)
+AoY = dot(Ao.GetPosition(No) , ny>)
+AoZ = dot(Ao.GetPosition(No) , nz>)
+
+BaX = dot(BA.GetPosition(No) , nx>)
+BaY = dot(BA.GetPosition(No) , ny>)
+BaZ = dot(BA.GetPosition(No) , nz>)
+
+
+CbX = dot(Cb.GetPosition(No) , nx>)
+CbY = dot(Cb.GetPosition(No) , ny>)
+CbZ = dot(Cb.GetPosition(No) , nz>)
+
+DcX = dot(Dc.GetPosition(No) , nx>)
+DcY = dot(Dc.GetPosition(No) , ny>)
+DcZ = dot(Dc.GetPosition(No) , nz>)
+
+EdX = dot(Ed.GetPosition(No) , nx>)
+EdY = dot(Ed.GetPosition(No) , ny>)
+EdZ = dot(Ed.GetPosition(No) , nz>)
+
+FeX = dot(Fe.GetPosition(No) , nx>)
+FeY = dot(Fe.GetPosition(No) , ny>)
+FeZ = dot(Fe.GetPosition(No) , nz>)
+
+QX = dot(Q.GetPosition(No) , nx>)
+QY = dot(Q.GetPosition(No) , ny>)
+QZ = dot(Q.GetPosition(No) , nz>)
+
+RockX = dot(P.GetPosition(No) , nx>)
+RockY = dot(P.GetPosition(No) , ny>)
+RockZ = dot(P.GetPosition(No) , nz>)
+
+Output t sec , AoX m , AoY m , AoZ m , BaX m ,BaY m ,BaZ m ,CbX m ,CbY m ,CbZ m ,DcX m ,DcY m ,DcZ m ,EdX m ,EdY m ,EdZ m ,FeX m ,FeY m ,FeZ m ,QX m ,QY m ,QZ m ,RockX m ,RockY m ,RockZ m
+Outputplot t sec , qa deg , qb deg , qc deg , qd deg , qe deg , qf deg
+Outputplot t sec , QX m , QY m, QZ m
+Outputplot t sec , TA , TB , TC , TD , TE , TF
+
+
+ODE() MIPSI_SUP.m
+save MIPSI_SUP.html
+quit

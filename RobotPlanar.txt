@@ -1,0 +1,44 @@
+NewtonianFrame N
+RigidBody A , B
+Point Q ( B )
+Point BA ( B ) , AB ( A )
+
+
+Constants LA , LB , Izz , ma , mb , g , xi , yi , xf ,yf
+Variables qa'' , qb''
+Variables FABx , FABy , TA , TB
+
+
+A.RotateZ (N , qa)
+B.RotateZ (N , qb)
+
+Acm.Translate (  No, -LA/2*ay>)
+ AB.Translate (  No , -LA*ay>)
+ BA.Translate (  No, -LA/2*ay>)
+Bcm.Translate ( Acm, -LA/2*ay> - LB/2*by>)
+  Q.Translate ( Bcm, -LB/2*by>)
+
+A.SetMassInertia ( ma , 0 ,0 ,Izz)
+B.SetMassInertia ( mb , 0 ,0 ,Izz)
+
+BA.AddForce ( AB , FABx*ax> + FABy*ay>)
+
+System.AddForceGravity ( -g*ny> )
+A.AddTorque(N,TA*nz>)
+B.AddTorque(A,TB*nz>)
+
+% Equations
+eqn[1] = B.GetDynamics ( BA )
+eqn[2] = System(A,B).GetDynamics(No)
+
+% Specify qa'' & qb''
+
+equation[1] = dot(Q.GetPosition(No),ny>) + 0.2
+Vel[1] = dot(q.GetVelocity(N),nx>) + 1.2
+Vel[2] = dot(Q.GetVelocity(N),ny>)
+solveDt(VEL , qa' , qb')
+
+%SetDt ( qa = )
+
+Input tfinal = 1 sec
+Input g = 9.81 m/s^2 , LA = 1 m , LB = 1 m , ma = 1 kg , mb = 1 kg

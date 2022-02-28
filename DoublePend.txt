@@ -1,0 +1,54 @@
+NewtonianFrame  N            % Earth.
+RigidBody       A            % Upper rod.
+RigidBody       B            % Lower plate.
+%--------------------------------------------------------------------
+Variable   qA''              % Pendulum angle and its time-derivatives.
+Variable   qB''              % Plate angle and its time-derivative.
+Constant   LA = 7.5 cm       % Distance from pivot to A's mass center.
+Constant   LB = 20 cm        % Distance from pivot to B's mass center.
+Constant   g = 9.81 m/s^2    % Earth's gravitational acceleration.
+A.SetMassInertia( mA =  10 grams,  IAx = 50 g*cm^2,  IAy,  IAz )
+B.SetMassInertia( mB = 100 grams,  IBx = 2500 g*cm^2, IBy = 500 g*cm^2, IBz = 2000 g*cm^2 )
+%--------------------------------------------------------------------
+%   Rotational kinematics.
+A.RotateX( N, qA )
+B.RotateZ( A, qB )
+%--------------------------------------------------------------------
+%   Translational kinematics.
+Acm.Translate( No, -LA*Az> )
+Bcm.Translate( No, -LB*Az> )
+%--------------------------------------------------------------------
+%   Add relevant contact/distance forces.
+System.AddForceGravity( -g*Nz> )
+%--------------------------------------------------------------------
+%   Equations of motion via free-body-diagrams (MG road-maps).
+Dynamics[1] = Dot( Ax>,  System(A,B).GetDynamics(No)  )
+Dynamics[2] = Dot( Bz>,            B.GetDynamics(Bcm) )
+%--------------------------------------------------------------------
+%   Kinetic and potential energy.
+KE = System.GetKineticEnergy()
+PE = System.GetForceGravityPotentialEnergy( -g*Nz>, No )
+MechanicalEnergy = KE + PE
+%--------------------------------------------------------------------
+%   Optional: Equations of motion with Kane's method.
+SetGeneralizedSpeed( qA', qB' )
+KaneDynamics = System.GetDynamicsKane()
+%--------------------------------------------------------------------
+%   Optional: Equations of motion with Lagranges's method.
+SetGeneralizedCoordinates( qA, qB )
+LagrangeDynamics = System.GetDynamicsLagrange( SystemPotential = PE )
+%--------------------------------------------------------------------
+%   Solve dynamics equations for qA'', qB''.
+Solve( Dynamics = 0,   qA'',  qB'')
+%--------------------------------------------------------------------
+%   Integration parameters and initial values.
+Input  tFinal = 10 sec,  tStep = 0.02 sec,  absError = 1.0E-07,  relError = 1.0E-07
+Input  qA = 90 deg,  qA' = 0.0 rad/sec,  qB = 1.0 deg,  qB' = 0.0 rad/sec
+%--------------------------------------------------------------------
+%   List output quantities and solve ODEs.
+Output  t sec,  qA deg,  qB deg,  MechanicalEnergy Joules
+OutputPlot t sec , qb
+ODE()  DoublePend.m
+%--------------------------------------------------------------------
+%   Record input together with responses
+Save DoublePend.html

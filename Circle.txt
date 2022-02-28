@@ -1,0 +1,62 @@
+NewtonianFrame N
+RigidBody A , C
+RigidFrame B
+Point Q ( C )
+Particles BA , BC
+
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Constants g , la , lc , r , ma , mb , mc
+Specified qa'' , db'' , qc''
+Variables Ta , Fb , Tc
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A.RotateY ( N , qa )
+B.RotateZ ( A ,  0 )
+C.RotateZ ( B , qc )
+
+Acm.Translate ( No , La/2*ay>)
+Ba.Translate ( Acm , la/2*ay>)
+bc.Translate ( ba , db*bx>)
+ccm.Tra
+
+
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+IAxx  = (1/12)*(MA*(LA^2+3*r^2))
+IByy = (1/2)*(ma*r^2)
+IBxx  = (1/12)*(MB*(LB^2+3*r^2))
+IByy = (1/2)*(mb*r^2)
+ICxx  = (1/12)*(Mc*(Lc^2+3*r^2))
+ICyy = (1/2)*(mc*r^2)
+
+
+
+A.SetMassInertia(ma  , IAxx , IAyy, IAxx)
+BA.SetMassInertia(mb/2)% , IBxx , IByy, IBxx)
+BC.SetMassInertia(mb/2)% , IBxx , IByy, IBxx)
+C.SetMassInertia(mc , ICxx , ICyy, ICxx)
+
+System.AddForceGravity(-g*ny>)
+
+A.AddTorque(N , Ta*nz>)
+Ba.AddForce(AB , Fb*bx>)
+C.AddTorque(B , Tc*cz>)
+
+% Specified
+theta = pi*t/4
+rCircle = 0.3
+
+xCircle = rCircle*cos(theta) + xCenter
+yCircle = yCenter
+zCircle = rCircle*sin(theta) + zCenter
+
+
+DesMotion[1] = dot(Q.GetPosition(no) , nx>) - xCircle
+DesMotion[2] = dot(Q.GetPosition(no) , ny>) - yCircle
+DesMotion[3] = dot(Q.GetPosition(no) , nz>) - zCircle
+
+SolveSetInput(evaluate(DesMotion , t=0) , qa = 5 deg , qb =0 , qc = 8)
+
+solve(dt(desmotion) , qa',qb',qc')
+
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

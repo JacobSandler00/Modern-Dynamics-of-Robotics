@@ -1,0 +1,73 @@
+NewtonianFrame  N            % String (heading reference frame).
+RigidFrame      A            % Tilt reference frame.
+RigidFrame      B            % Rolling disk (massless).
+RigidBody       C            % Bear on high wire.
+Point           BA( B )      % Point of B in contact with A.
+%--------------------------------------------------------------------
+Variable  qA''               % Angle from Nz> to Az> with  -Nx>  sense.
+Variable  wB'                % Ay> measure of B's angular velocity in A.
+Variable  qC''               % Angle from Nz> to Cz> with  +Ay>  sense.
+Variable  x''                % Nx> measure of Bo's position from No.
+Variable  Fx                 % Ax> measure of rolling constraint force on wheel.
+Specified TBC                % Ay> measure of pedaling torque on B from C.
+Constant  r = 30 cm          % Radius of disk C.
+Constant  g = 9.8 m/s^2      % Earth's gravitational constant.
+Constant  Lc = -35 cm        % Ccm is below the string!
+C.SetMass( m = 2 kg )
+C.SetInertia( CCm,  I = 3.4 kg*m^2,  J = 3.2 kg*m^2,  K = 2.8 kg*m^2 )
+%--------------------------------------------------------------------
+%   Rotational kinematics.
+A.RotateX( N,  -qA  )
+C.RotateY( A,   qC  )
+B.SetAngularVelocityAcceleration( A,  wB*Ay>  )
+%--------------------------------------------------------------------
+%   Translational kinematics.
+Bo.Translate( No,  x*Nx> + r*Az>  )
+CCm.Translate( Bo,  Lc*Cz> )
+BA.Translate( Bo,  -r*Az> )
+%--------------------------------------------------------------------
+%   Impose rolling constraint (can be solved for either wB or x').
+RollingConstraint = Dot(  BA.GetVelocity(N),  Nx>  )
+SolveDt(  RollingConstraint,  wB )
+%--------------------------------------------------------------------
+%   Add relevant forces and torques.
+System.AddForceGravity(  -g*Nz>  )
+BA.AddForce(  Fx*Ax>  )
+B.AddTorque( C,  TBC*Ay> )
+%--------------------------------------------------------------------
+%   Form equations of motion with MG road-maps for qA, wB, qC, x.
+%   Note: Alternate MG road-map for wB works equally well (and is shorter).
+Dynamics[1]  = Dot(  Ax>,  System(A,B,C).GetDynamics(BA)  )   % For qA.
+Dynamics[2]  = Dot(  Ay>,    System(B,C).GetDynamics(BA)  )   % For wB.
+Dynamics[2] := Dot(  Ay>,              B.GetDynamics(Bo)  )   % For wB (alternate).
+Dynamics[3]  = Dot(  Ay>,              C.GetDynamics(Bo)  )   % For qC.
+Dynamics[4]  = Dot(  Ax>,  System(A,B,C).GetDynamics()    )   % For  x.
+%--------------------------------------------------------------------
+%   Optional: Equations of motion with Kane's method.
+SetGeneralizedSpeed( x',  qA',  qC' )
+KaneEqns = System.GetDynamicsKane()
+%--------------------------------------------------------------------
+%   Optional: Equations of motion with Lagrange's method (when TBC = 0).
+SetGeneralizedCoordinate( x,  qA,  qC )
+PE = System.GetForceGravityPotentialEnergy( -g*Nz>, No )
+LagrangeEqns = System.GetDynamicsLagrange( SystemPotential = PE )
+%--------------------------------------------------------------------
+%   PD control system for TBC.
+Constant  xDesired = 10 m
+TBC = -0.3*(x - xDesired) - 0.6*x'
+%--------------------------------------------------------------------
+%   Integration parameters and initial values.
+Input  tFinal = 12 sec, tStep = 0.05 sec,  absError = 1.0E-07
+Input  x = 0 m,     qA  = 10 deg,      qC  = 0 deg
+Input  x' = 0 m/s,  qA' =  0 rad/sec,  qC' = 0 rad/sec
+%--------------------------------------------------------------------
+%   List output quantities and solve ODEs.
+Output  t sec,  x m,  qA deg,  qC deg
+OutputPlot t sec , x
+OutputPlot t sec , qa
+OutputPlot t sec , qc
+ODE( Dynamics = 0,   qA'',  qC'',  x'', Fx ) Bear.m
+%--------------------------------------------------------------------
+%   Record input and program responses.
+Save Bear.html
+Quit

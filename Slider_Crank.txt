@@ -1,0 +1,48 @@
+NewtonianFrame N
+RigidBody A, B, C
+
+Constants La, Lb, Lc
+Specified qa''
+Variables qb'', qc'',x''
+
+A.RotateZ(N,  qa)
+B.RotateZ(A, -qb)
+C.RotateZ(B,  qc)
+
+Acm.Translate(No,La/2*ax>)
+Bcm.Translate(No,La*ax> + Lb/2*bx>)
+Ccm.Translate(No, La*ax> + Lb*bx>)
+
+
+
+% Kinematic Differential Equations
+ContactCNST = dot(Ccm.GetPosition(No),ny>)
+OrientationCNST = cos(qb-qa-qc) - 1
+
+% Constraints
+CNST[1] = dot(Ccm.GetVelocity(N),ny>)
+CNST[2] = dot(C.GetAngularVelocity(N),nz>)
+solveDt(CNST,qb',qc')
+
+% Specify qa''
+SetDt(qa' = 0.5 )
+x = dot(Ccm.Getposition(No),nx>)
+y = dot(Ccm.Getposition(No),ny>)
+
+
+
+% Must find Initial Values qa,qb,qc that satisfy the Constraints
+
+Input La = .4 m , Lb = .8 m , Lc = .1 m
+Input qa = pi/6 rad
+SolveSetInput([ContactCNST; ORientationCNST],qb = 30 deg , qc = 30 deg)
+
+Input tFinal = 12 seconds, tStep = 0.2 seconds
+
+Outputplot t seconds, x m
+Outputplot t seconds, y m
+
+
+%ODE() Slider_Crank.m
+
+ %Save Slider_Crank.html

@@ -1,0 +1,132 @@
+% Modeling & Identifiers ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NewtonianFrame N
+RigidBody A , B , C , D , E
+Particle Q
+Point BC ( B ) , DE ( D )
+
+Constants g , mBox , mBody
+Constants qa1 , qa2 , qb1 , qb2  , qc1 , qc2 , qd1 , qd2
+
+Constants LA , LB , LC , LD , LE , LPACM , LPBCM , LPCCM , LPDCM , LPECM
+Constants rpa , rpb , rpc , rpd , rpe , ra , rb , rc,rd, re
+Constants mpa, mpb, mpc, mpd, mpe , ma , mb , mc , md , me
+Constants Ia , Ib , Ic , Id , Ie
+Variables qa'' , qb'' , qc'' , qd'' , qe'' , TAN , TBA , TCB , TDC , TED
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+% Physics ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+A.RotateZ(N ,-qa)
+B.RotateZ(A , qb)
+C.RotateZ(B ,-qc)
+D.RotateZ(C , qd)
+E.RotateZ(D , qe)
+
+LACM = LA * LPACM
+LBCM = LB * LPBCM
+LCCM = LC * LPCCM
+LDCM = LD * LPDCM
+LECM = LE * LPECM
+
+Acm.Translate(No , LACM*ay>)
+Bcm.Translate(No , LA*ay> + LBCM*by>)
+Ccm.Translate(No , LA*ay> + LB*by> + LCCM*cy>)
+Dcm.Translate(No , LA*ay> + LB*by> + LC*cy> + LDCM*dx>)
+Ecm.Translate(No , LA*ay> + LB*by> + LC*cy> + LD*dx> + LECM*ex>)
+Q.Translate(No, LA*ay> + LB*by> + LC*cy> + LD*dx> + LE*ex>)
+BC.Translate(No , LA*ay> + LB*by>)
+DE.Translate(No , LA*ay> + LB*by> + LC*cy> + LD*dx>)
+
+A.SetMassInertia(ma,0,0,Ia)
+B.SetMassInertia(mb,0,0,Ib)
+C.SetMassInertia(mc,0,0,Ic)
+D.SetMassInertia(md,0,0,Id)
+E.SetMassInertia(me,0,0,Ie)
+Q.SetMass(mBox)
+
+System.AddForceGravity(-g*ny>)
+
+A.AddTorque( n , Tan*nz>)
+B.AddTorque( n , Tba*nz>)
+C.AddTorque( n , Tcb*nz>)
+D.AddTorque( n , Tdc*nz>)
+E.AddTorque( n , Ted*nz>)
+
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+heightQ = dot(Q.GetPosition(No) , ny>)
+functQ = spline(TRANSITION , t , 0 , 3 , 0 , 1.2)
+
+CNST = heightQ - functQ
+Initial[1] = qa - qb
+Initial[2] = qd - qe
+Initial[3] = qc - 50*pi/180
+Initial[4] = qa - 80*pi/180
+
+CONSTANT ext = .26 m
+
+FINAL[1] = qc - 10*pi/180
+FINAL[2] = qa - 15*pi/180
+FINAL[3] = dot(bc.GetPosition(no) , nx>)
+FINAL[4] = dot(Q.Getposition(no) , nx>) - .26
+
+Input LA = 432.3 mm , LPACM = .4416
+Input LB = 368.5 mm , LPBCM = .3612
+Input LC = 529.3 mm , LPCCM = .4151
+Input LD = 275.1 mm , LPDCM = .5754
+Input LE = 264.3 mm , LPECM = .4559
+
+StartAngles = solve(evaluateatinput([CNST ; Initial] , t = 0 s) , qa = 80 deg , qb = 80 deg , qc = 50 deg , qd = 100 deg , qe = 100 deg)
+FinalAngles = solve(evaluateatinput([CNST ; FINAL] , t = 3 s) , qa = 15 deg , qb  = 27 deg , qc = 10 deg , qd = 15 deg , qe = 100 deg)
+qa1 = StartAngles[1]
+qb1 = StartAngles[2]
+qc1 = StartAngles[3]
+qd1 = StartAngles[4]
+qe1 = StartAngles[5]
+
+qa2 = FinalAngles[1]
+qb2 = FinalAngles[2]
+qc2 = FinalAngles[3]
+qd2 = FinalAngles[4]
+qe2 = FinalAngles[5]
+
+setDt( qa = spline(TRANSITION , t , 0 , 3 , qa1 , qa2))
+setDt( qb = spline(TRANSITION , t , 0 , 3 , qb1 , qb2))
+setDt( qc = spline(TRANSITION , t , 0 , 3 , qc1 , qc2))
+setDt( qd = spline(TRANSITION , t , 0 , 3 , qd1 , qd2))
+setDt( qe = spline(TRANSITION , t , 0 , 3 , qe1 , qe2))
+
+System.SetGeneralizedSpeed(qa' ,qb' , qc' ,qd')
+KANE = system.GetDynamicsKane()
+RM = dot(E.GetDynamics(DE) , nz>)
+solve([KANE ; RM] , TAN , TBA , TCB , TDC , TED )
+
+Input g = 9.81 m/s^2 , mBox = 5 kg , mBody = 61.9 kg
+Input tFinal = 3 s , tStep = .01 s
+Input mpa = .0481, mpb = .1478, mpc = .4257, mpd =.0255, mpe = .0138
+Input rpa = .093, rpb = .162, rpc = .171, rpd =.148, rpe =.094
+
+
+Input rA = evaluateatinput(LA * rpa)
+Input rB = evaluateatinput(LB * rpb)
+Input rC = evaluateatinput(LC * rpc)
+Input rD = evaluateatinput(LD * rpd)
+Input rE = evaluateatinput(LE * rpe)
+
+Input ma = evaluateatinput(mBody * mpa)
+Input mb = evaluateatinput(mBody * mpb)
+Input mc = evaluateatinput(mBody * mpc)
+Input md = evaluateatinput(mBody * mpd)
+Input me = evaluateatinput(mBody * mpe)
+
+Input Ia = evaluateatinput((mBODY * ma)*(la*ra)^2)
+Input Ib = evaluateatinput((mBODY * mb)*(lb*rb)^2)
+Input Ic = evaluateatinput((mBODY * mc)*(lc*rc)^2)
+Input Id = evaluateatinput((mBODY * md)*(ld*rd)^2)
+Input Ie = evaluateatinput((mBODY * me)*(le*re)^2)
+
+OutPutPlot t sec , qa deg , qb deg , qc deg , qd deg , qe deg
+OutPutPlot t sec , TAN n*m , TBA n*m, TCB n*m, TDC n*m, TED n*m
+
+variable dumb' = .1234
+input dumb = 0
+ODE() Final.m
+save Final.html

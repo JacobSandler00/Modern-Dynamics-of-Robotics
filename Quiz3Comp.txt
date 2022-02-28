@@ -1,0 +1,91 @@
+NewtonianFrame N
+RigidBody A , B , C
+Particles D , P
+
+Constants g , mA , mB , mC , mD , mP
+Constants IzzA , IzzB , IzzC
+Constants rA , LB , LC , LN , ks , bs
+Constants khc , lhc , nhc
+Constants L , wn , kp , kd ,  qades , qbdesD
+
+Variables qa'' , qb'' , qc'' , y'' , ys''
+Specified TA , TB , pen''
+
+
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A.RotateZ( N , qa )
+B.RotateZ( N , qb )
+C.RotateZ( N ,-qc )
+
+P.Translate( No ,  y*ny>)
+D.Translate(  P , ys*ny>)
+Ccm.Translate(  D , -LC/2*cx>)
+Bcm.Translate(Ccm , -LC/2*cx> - LB/2*bx>)
+Acm.Translate(Bcm , -LB/2*bx>)
+
+yAcm  = dot(Acm.Getposition(No) , ny>)
+yP    = dot(P.Getposition(No) , ny>)
+yD    = dot(D.Getposition(No) , ny>)
+
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+IzzA = (1/2)*mA*rA^2
+IzzB = (1/12)*mB*LB^2
+IzzC = (1/12)*mC*LC^2
+
+kp = wn^2
+kd = 2*L*wn
+
+
+
+A.SetMassInertia( mA , 0 , 0 , IzzA)
+B.SetMassInertia( mB , 0 , 0 , IzzB)
+C.SetMassInertia( mC , 0 , 0 , IzzC)
+
+D.SetMass( mD )
+P.SetMass( mP )
+
+System.AddForceGravity( -g*ny>)
+
+D.AddForce( P , -ks*(ys - LN)*ny>)
+D.AddForce( P , -bs*ys'*ny>)
+
+setDt(pen = -y)
+FHC = khc*pen^nhc + lhc*pen'*pen^nhc
+P.AddForce( FHC*ny>)
+
+TA = kp*(qades - qa) + kd*(-qa')
+TB = kp*(qbdesD - qb') + kd*(-qb'')
+
+A.AddTorque(N ,  TA*nz> )
+B.AddTorque(A , -TB*nz>)
+
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+CNST = (dot(Acm.GetPosition(No) , nx>))
+
+Input g = 9.80655 m/s^2 , mA = 10 kg , mB = 4 kg, mC = 4 kg , mD = 2 kg, mP = 1 kg
+Input rA = .025 m , LB = .05 m , LC = .1 m  , LN = .05 m , ks = 1e5 N/m , bs = 1.5e4 N*s/m
+Input khc = 1e7 , lhc = 5e6 , nhc = 1.5 , L = 0.8 , wn  = 20
+Input qades = 0 rad , qbdesD = 20 rad/s
+
+Input tInitial = 0 s , tFinal = 4 s , tStep = .02 s
+Input qa = 0 deg , qb = 90 deg , qa' = 0 deg , qb' = 0 , y' = 0 , ys' = 0
+Input y = 0.0 m , ys = 0.05 m
+
+solveSetInput(evaluate(CNST , t = tInitial) , qc = 90 deg)
+solveDt(dt(CNST) , qc' = 0 deg/s)
+
+
+SetGeneralizedSpeeds(y' , ys' , qa' , qb')
+KaneEquations = System.GetDynamicsKane()
+Solve(KaneEquations , dt(GetGeneralizedSpeed()))
+
+Outputplot t sec , y m , ys m , yacm m
+
+ODE Quiz3Comp.m
+
+SAVE Quiz3Comp.html
+
+quit

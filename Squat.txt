@@ -1,0 +1,67 @@
+NewtonianFrame N
+RigidBody A , B , C
+Particle Q
+
+Constant LA , LB , LC , LX , LY
+Constant g , mA , mB , mC , mQ
+Constant IzzA , IzzB , IzzC
+Constant yFinal
+
+Variables qA'' , qB''
+Variables TA , TB , TC
+
+Specified y''
+Specified qC''
+
+A.RotateZ(N , qA)
+B.RotateZ(N , -qB)
+C.RotateZ(N , qc)
+
+Acm.Translate(No  , LA/2*ax>)
+Bcm.Translate(Acm , LA/2*ax> - LB/2*bx>)
+Ccm.Translate(Bcm ,-LB/2*bx> + LC/2*cx>)
+ Co.Translate(Ccm , LC/2*cx>)
+  Q.Translate(Co  , -LX*cx> + LY*cy>)
+
+A.SetMassInertia(mA , 0 , 0 , IzzA)
+B.SetMassInertia(mB , 0 , 0 , IzzB)
+C.SetMassInertia(mC , 0 , 0 , IzzC)
+Q.SetMass(mQ)
+
+
+System.AddForceGravity(-g*ny>)
+A.AddTorque(N , TA*nz>)
+B.AddTorque(A , -TB*nz>)
+C.AddTorque(B , TC*nz>)
+
+yinitial = evaluate(dot(Q.GetPosition(No), ny>), qA = pi/6 rad, qB = 0 deg, qC = 5*pi/6 rad, LA = 0.5 m,LB = .5 m ,  LC = 0.5 m, Ly = 0.01 m, Lx = 0.1 m)
+setDt (qc = 5*pi/6)
+
+setDt( y = Spline(TRANSITION , t , 0 , 10 , yInitial , yFinal) )
+
+CNST[1] = dot(Q.GetVelocity(N) , nx>)
+CNST[2] = dot(Q.GetVelocity(N) , ny>) - y'
+solveDt(CNST , qa' , qb' )
+
+System.SetGeneralizedSpeed(qA' , qB' , qC')
+kaneEQN = System.GetDynamicsKane()
+solve(kaneEQN , TA , TB , TC)
+
+Input LA = 0.5 m , LB = 0.5 m , LC = 0.5 m , LX = 0.1 m , LY = 0.01 m
+Input tInitial = 0 s , tFinal = 10 s , tStep = 0.02 s
+Input g = 9.8 m /s^2, mA = .3 kg, mB = .4 kg, mC = .37 kg, mQ = .1 kg
+Input IzzA = .3 kg, IzzB = .3 kg, IzzC = .3 kg
+Input yFinal = 1.1 m
+Input qA = pi/6 rad , qB = 0 deg
+
+xQ = dot(Q.GetPosition(No) , nx>)
+yQ = dot(Q.GetPosition(No) , ny>)
+
+Outputplot xQ m, yQ m
+Outputplot t s , qA rad , qB rad , qc rad
+Outputplot t s , TA N*m , TB N*m , TC N*m
+
+ODE() Squat.m
+
+save SQUAT.html
+quit

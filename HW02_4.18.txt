@@ -1,0 +1,50 @@
+% HW 2 -- Problem 4.18
+
+% Initial Construction of Problem
+
+NewtonianFrame N         % Ceiling with Nx> horizontally right, Ny> vertically down
+RigidBody      B         % Beam with Bx> pointing from Bo to Bc and Bz> = Nz>.
+Point          Nc( N )   % Point of N attached to cable C.
+Point          Bc( B )   % Point of B attached to cable C.
+
+Constant  LN = 6 m       % Distance between No and NC.
+Constant  LB = 4 m       % Distance between Bo and BC.
+Specified LA'            % Length of cable A (connects Bo to No).
+Specified LC'            % Length of cable C (connects BC to NC).
+
+Variable  x', y'         % Nx> and Ny> measures of Bo's position vector from No.
+Variable  q'             % Angle "theta" from Nx> to Bx> with positive sense +Nz>.
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%  Kinematics
+
+B.SetRotationMatrixZ( N,  q )
+
+Bo.SetPosition( No,  x*Nx> + y*Ny> )
+Bcm.SetPosition( Bo,  0.5*LB*Bx> )
+BC.SetPosition( Bo,  LB*Bx> )
+NC.SetPosition( No,  LN*Nx> )
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+% Constraint relating cable lengths to magnitudes of position vectors.
+LengthConstraint[1] = LA^2 - Bo.GetDistanceSquared( No )
+LengthConstraint[2] = LC^2 - Bc.GetDistanceSquared( Nc )
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+% Solve for y and q (theta) from given values of x, LA, LB, LC, LN.
+
+Input  x = 2 m,  LA = 2.7 m,  LC = 3.7 m
+Solve( LengthConstraint = 0,  y = 2 m,  q = 0 degrees )
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%   Differentiate the constraint equations to relate LA', LC' to x', y', q'.
+DtLengthConstraint = Dt( LengthConstraint )
+Solve( DtLengthConstraint = 0,  LA', LC' )
+
+
+save HW02_4.18.html
+quit

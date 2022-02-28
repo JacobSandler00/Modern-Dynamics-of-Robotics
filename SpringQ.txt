@@ -1,0 +1,42 @@
+NewtonianFrame N
+Point A , B , C
+Particle Q
+
+Constants g , m , d , x , y , z  , ka , kb , kc
+Variable LnA , LnB , LnC
+
+Q.SetPosition(No , x*nx> + y*ny> + z*nz>)
+Q.SetPosition(A , x*nx> - (8-y)*ny> - (20-z)*nz>)
+Q.SetPosition(B , x*nx> - (8-y)*ny> + z*nz>)
+Q.SetPosition(C , -(15-x)*nx> - (8-y)*ny> - (20-z)*nz>)
+
+Q.Setmass(N)
+Q.AddForceGravity(-m*g*ny>)
+
+
+LA = GetMagnitude(Q.GetPosition(A))
+LB = GetMagnitude(Q.GetPosition(B))
+LC = GetMagnitude(Q.GetPosition(C))
+
+ka = 2079 %(E*pi*d^2/4)/(LA)
+kb = 2440 %(E*pi*d^2/4)/(LB)
+kc = 1690 %(E*pi*d^2/4)/(LC)
+
+u> = Q.GetPosition(A)/LA
+w> = Q.GetPosition(B)/LB
+x> = Q.GetPosition(C)/LC
+
+Q.AddForce(ka*(LA-LnA)*u>)
+Q.AddForce(kb*(LB-LnB)*w>)
+Q.AddForce(kc*(LC-LnC)*x>)
+
+EQN[1] = dot(Q.GetStatics(),nx>)
+EQN[2] = dot(Q.GetStatics(),ny>)
+EQN[3] = dot(Q.GetStatics(),nz>)
+
+
+input g = 9.8 m/s^2 , m = 10 kg  , x = 5 m , y = 7.7 m , z = 9 m , d = 0.004 m
+solvesetinput(EQN , [LnA , LnB , LnC])
+
+
+save springq.html

@@ -1,0 +1,11 @@
+Constant  Ixx = 1 kg*m^2,  Iyy = 2 kg*m^2,  Izz = 3 kg*m^2
+Variable  wx',  wy',  wz'
+wx' = (Iyy-Izz) * wy * wz / Ixx
+wy' = (Izz-Ixx) * wx * wz / Iyy
+wz' = (Ixx-Iyy) * wx * wy / Izz
+Input  wx = 0.2 rad/sec,   wy = 7.0 rad/sec,  wz = 0.2 rad/sec
+Input  tFinal = 4 sec,   tStep = 0.02 sec
+OutputPlot  t sec,  wx rad/sec,  wy rad/sec,  wz rad/sec
+ODE() CoupledODESFirstOrder
+
+save HW04_6.26.html

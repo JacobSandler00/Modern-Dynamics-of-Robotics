@@ -1,0 +1,82 @@
+
+% RPR Robot for Fall 2021
+% In Class Model (Model B as 2 particles each with half mass pushed apartby FB)
+% An Alternative model is to keep B as a rigid body and have a forcebetween BA(B) and AB(A)
+% ------------ Modeling ------------
+NewtonianFrame N
+Rigidbody A, C
+RigidFrame B
+Points Q(C)
+Points AB(A)
+Particles BA, BC
+% ------------ Identifiers ------------
+Constants g, LA, LC, r
+Constants mA, mB, mC
+Specified qa'', db'', qc''
+Variables TA, FB, TC
+% ------------ Rotational Kinematics ------------
+A.RotateY(N, qA)
+B.RotateZ(A, 0)
+C.RotateZ(B, qC)
+% ------------ Translation Kinematics ------------
+Acm.Translate(No, LA/2*ny>)
+BA.Translate(Acm, LA/2*ny>)
+BC.Translate(BA, db*ax>)
+CCm.Translate(BC, LC/2*cx>)
+Q.Translate(Ccm, LC/2*cx>)
+% ------------ Mass / Inertia ------------
+IAYY = 1/2*mA*r^2
+IAXX = 1/12*mA*(LA^2 + 3*r^2)
+ICXX = 1/2*mC*r^2
+ICYY = 1/12*mC*(LC^2 + 3*r^2)
+A.SetMassInertia(mA, Acm, IAXX, IAYY, IAXX)
+BA.SetMass(mB/2)
+BC.SetMass(mB/2)
+C.SetMassInertia(mC, Ccm, ICXX, ICYY, ICYY)
+% ------------ Force / Torque ------------
+System.AddForceGravity (-g*ny>)
+A.AddTorque(N, TA*Ny>)
+BC.AddForce(BA, FB*ax>)
+C.AddTorque(B, TC*cz>)
+% ------------ Desired (Specified Motion) ------------
+% Specified (Q Moving on a Circle)
+% Circle - A*sin(omega*t) + y0, A*cos(omega*t)+x0
+Constant radiusCircle = 0.3 rad, omega = pi/4 rad/sec, xCenter = 2.0 m,yCenter = 1.15 m, zCenter = 0.0 m
+xCircle = radiusCircle*cos(omega*t) + xCenter
+yCircle = 0 + yCenter
+zCircle = radiusCircle*sin(omega*t) + zCenter
+DesiredMotion[1] = dot(Q.GetPosition(No), nx>) - xCircle
+DesiredMotion[2] = dot(Q.GetPosition(No), ny>) - yCircle
+DesiredMotion[3] = dot(Q.GetPosition(No), nz>) - zCircle
+solveDT(dt(DesiredMotion), qA', dB', qC')
+% ------------ Solve ------------
+RoadMap[1] = dot(System(A,BA,BC,C).GetDynamics(No), ny>)
+RoadMap[2] = dot(System(BC, C).GetDynamics(), bx>)
+RoadMap[3] = dot(C.GetDynamics(BC), cz>)
+solve(RoadMap, TA, FB, TC)
+% ------------ Initial Conditions ------------
+Input LA = 1.0 m, LC = 0.8 m, g = 9.81 m/s^2, R = 0.025 m
+Input mA = 1.0 kg, mB = 0.5 kg, mC = 0.5 kg
+Input tInitial = 0.0 seconds, tFinal = 8.0 seconds, tStep = 0.01 seconds,printIntScreen = 0
+% Solve for Initial Position to Put Q on Circle at time t = 0
+SolveSetInput(evaluate(DesiredMotion, t = tInitial), qA = 5 deg, dB = 1 m,qC = 20 deg)
+% ------------ ODE ------------
+% Set Output for plotting
+BAx = dot(BA.getPosition(No), nx>)
+BAy = dot(BA.getPosition(No), ny>)
+BAz = dot(BA.getPosition(No), nz>)
+BCx = dot(BC.getPosition(No), nx>)
+BCy = dot(BC.getPosition(No), ny>)
+BCz = dot(BC.getPosition(No), nz>)
+Qx = dot(Q.getPosition(No), nx>)
+Qy = dot(Q.getPosition(No), ny>)
+Qz = dot(Q.getPosition(No), nz>)
+Output t sec, BAx m, BAy m, BAz m, BCx m, BCy m, BCz m, Qx m, Qy m, Qz m
+Output t sec, qA rad, dB m, qC rad
+OutputPlot t sec, qA rad, dB m, qC rad
+OutputPlot t sec, Qx m, Qy m, Qz m
+OutputPlot Qz m, Qx m
+OutputPlot t sec, TA N*m, FB N, TC N*m
+%--------------------------------------------------------
+ODE() F21_Robot_RPR_InClass.m
+%--------------------------------------------------------

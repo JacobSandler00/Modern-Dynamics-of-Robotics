@@ -1,0 +1,33 @@
+% run StudentMicrophoneEX
+% Inspection of the Problem
+
+NewtonianFrame N          % Introduces nx> ny> nz> No
+Point Q , A , B , C       % 4 Points which are important for the problem
+Constant LA , LB , LC     % Cable Lengths
+Variables x , y , z
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% Kinematics
+
+% A method for making Q's position Vector from No
+Q.SetPosition(No,x*nx> + y*ny> + z*nz>)
+B.SetPosition(No,8*nz>)
+A.SetPosition(No,20*nx> + 8*nz>)
+
+% Also could set As position from B : A.SetPosition(B, 20*nx>)
+
+C.SetPosition(B,15*ny>)
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% Equation Setup
+% LA = Q.GetMagnitude(A)
+
+LA = 15
+LB = 13
+LC = 11
+
+EQN[1] = LA - Q.GetDistance(A)
+EQN[2] = LB - Q.GetDistance(B)
+EQN[3] = LC - Q.GetDistance(C)
+
+solve(EQN,x = 10 , y = 7 , z = 3)
